@@ -71,15 +71,20 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
       const formData = new FormData();
       formData.append('init_image', blob);
       
-      // Add the text prompt parameter required by Stability AI
-      formData.append('text_prompts[0][text]', 'Convert this image to Studio Ghibli style animation, soft colors, hand-drawn feel, whimsical, dreamy Hayao Miyazaki style');
+      // Enhanced Ghibli-style prompt with specific style details
+      formData.append('text_prompts[0][text]', 'Transform this image into authentic Studio Ghibli anime style, Hayao Miyazaki style, hand-drawn animation, soft pastel colors, detailed backgrounds, charming characters with large expressive eyes, whimsical atmosphere, dreamy watercolor aesthetic, nature elements, similar to Spirited Away and My Neighbor Totoro');
       formData.append('text_prompts[0][weight]', '1');
       
+      // Add negative prompt to avoid unwanted elements
+      formData.append('text_prompts[1][text]', 'photorealistic, 3D, CGI, photography, digital art, highly detailed faces, dark colors, gloomy, dark shadows, sharp edges');
+      formData.append('text_prompts[1][weight]', '-0.5');
+      
       // Set other required parameters
-      formData.append('image_strength', '0.35'); // Lower value = more influence from the prompt
+      formData.append('image_strength', '0.25'); // Lower value = more influence from the prompt
       formData.append('init_image_mode', 'IMAGE_STRENGTH');
-      formData.append('cfg_scale', '7');
-      formData.append('steps', '40');
+      formData.append('cfg_scale', '9'); // Higher creative freedom but still guided
+      formData.append('steps', '50'); // More steps for better quality
+      formData.append('style_preset', 'anime'); // Use anime style preset
       
       // Make the API call to Stability AI
       const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/image-to-image', {
@@ -125,7 +130,7 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
       const resizedImage = await resizeImage(sourceImage, 1024, 1024);
       const resizedBase64Data = resizedImage.split(',')[1];
       
-      // Make the API call to Leonardo AI
+      // Make the API call to Leonardo AI with improved Ghibli prompt
       const response = await fetch('https://cloud.leonardo.ai/api/rest/v1/generations', {
         method: 'POST',
         headers: {
@@ -133,10 +138,14 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: "Convert this image to Studio Ghibli style animation, soft colors, hand-drawn feel, whimsical, dreamy",
+          prompt: "Transform this image into authentic Studio Ghibli anime style, Hayao Miyazaki style, hand-drawn animation, soft pastel colors, detailed backgrounds, charming characters with large expressive eyes, whimsical atmosphere, dreamy watercolor aesthetic, nature elements, similar to Spirited Away and My Neighbor Totoro",
+          negative_prompt: "photorealistic, 3D, CGI, photography, digital art, highly detailed faces, dark colors, gloomy, dark shadows, sharp edges",
           imageData: resizedBase64Data,
           modelId: "6bef9f1b-29cb-40c7-b9df-32b51c1f67d3", // Leonardo creative model
           num_images: 1,
+          guidance_scale: 9,
+          alchemy: true, // Enable alchemy for better style transfer
+          promptMagic: true, // Enable prompt magic for better results
         }),
       });
 
