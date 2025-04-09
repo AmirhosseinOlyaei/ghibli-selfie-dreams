@@ -19,6 +19,37 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Function to resize an image to the allowed dimensions
+  const resizeImage = (dataUrl: string, targetWidth: number, targetHeight: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        
+        // Draw the image on the canvas with the new dimensions
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+        
+        // Get the resized image as a data URL
+        const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        resolve(resizedDataUrl);
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+      
+      img.src = dataUrl;
+    });
+  };
+
   const generateWithStabilityAI = async () => {
     if (!apiKey) {
       toast.error("API Key is required for image generation");
@@ -29,7 +60,12 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
     try {
       // Convert base64 image to blob for upload
       const base64Data = sourceImage.split(',')[1];
-      const blob = await fetch(`data:image/jpeg;base64,${base64Data}`).then(res => res.blob());
+      
+      // Resize the image to one of the allowed dimensions (1024x1024 is a safe choice)
+      const resizedImage = await resizeImage(sourceImage, 1024, 1024);
+      const resizedBase64Data = resizedImage.split(',')[1];
+      
+      const blob = await fetch(`data:image/jpeg;base64,${resizedBase64Data}`).then(res => res.blob());
       
       // Create form data for the API request
       const formData = new FormData();
@@ -85,6 +121,10 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
       // Convert base64 image to blob for upload
       const base64Data = sourceImage.split(',')[1];
       
+      // Resize the image to appropriate dimensions
+      const resizedImage = await resizeImage(sourceImage, 1024, 1024);
+      const resizedBase64Data = resizedImage.split(',')[1];
+      
       // Make the API call to Leonardo AI
       const response = await fetch('https://cloud.leonardo.ai/api/rest/v1/generations', {
         method: 'POST',
@@ -94,7 +134,7 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
         },
         body: JSON.stringify({
           prompt: "Convert this image to Studio Ghibli style animation, soft colors, hand-drawn feel, whimsical, dreamy",
-          imageData: base64Data,
+          imageData: resizedBase64Data,
           modelId: "6bef9f1b-29cb-40c7-b9df-32b51c1f67d3", // Leonardo creative model
           num_images: 1,
         }),
