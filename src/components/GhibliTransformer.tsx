@@ -35,6 +35,16 @@ const GhibliTransformer: React.FC<GhibliTransformerProps> = ({
       const formData = new FormData();
       formData.append('init_image', blob);
       
+      // Add the text prompt parameter required by Stability AI
+      formData.append('text_prompts[0][text]', 'Convert this image to Studio Ghibli style animation, soft colors, hand-drawn feel, whimsical, dreamy Hayao Miyazaki style');
+      formData.append('text_prompts[0][weight]', '1');
+      
+      // Set other required parameters
+      formData.append('image_strength', '0.35'); // Lower value = more influence from the prompt
+      formData.append('init_image_mode', 'IMAGE_STRENGTH');
+      formData.append('cfg_scale', '7');
+      formData.append('steps', '40');
+      
       // Make the API call to Stability AI
       const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/image-to-image', {
         method: 'POST',
