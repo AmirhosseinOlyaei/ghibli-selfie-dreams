@@ -1,5 +1,5 @@
-
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
 
 export default {
 	darkMode: ["class"],
@@ -117,9 +117,9 @@ export default {
 				'spin-slow': 'spin-slow 8s linear infinite'
 			},
 			backgroundImage: {
-				'ghibli-gradient': 'linear-gradient(135deg, #a8d8e8 0%, #94cfb5 50%, #ffdab9 100%)',
+				'ghibli-gradient': 'linear-gradient(135deg, #ADD8E6 0%, #94b5 50%, #68b9 100%)',
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [animate],
 } satisfies Config;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -13,7 +12,6 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string | null>(null);
-  const [provider, setProvider] = useState<'stability' | 'leonardo'>('stability');
 
   const handleImageSelected = (file: File) => {
     const reader = new FileReader();
@@ -24,9 +22,8 @@ const Index = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleApiKeySubmit = (key: string, selectedProvider: 'stability' | 'leonardo') => {
+  const handleApiKeySubmit = (key: string) => {
     setApiKey(key);
-    setProvider(selectedProvider);
   };
 
   const handleTransformComplete = (resultImageUrl: string) => {
@@ -69,7 +66,6 @@ const Index = () => {
                 <GhibliTransformer
                   sourceImage={uploadedImage}
                   apiKey={apiKey}
-                  provider={provider}
                   onTransformComplete={handleTransformComplete}
                 />
               </div>
